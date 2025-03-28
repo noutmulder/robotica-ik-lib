@@ -43,12 +43,35 @@ Vector3D Vector3D::subtractVector(const Vector3D& secondVector){
     return Vector3D(x - secondVector.x, y - secondVector.y, z - secondVector.z);
 }
 
+// print a vector for debugging
 void Vector3D::printVector() {
-    std::cout << "(" << x << ", " << y << ", " << z << ")";
+    std::cout << "(" << x << ", " << y << ", " << z << ")" << std::endl;
 
 }
 
+// scales a vector
 Vector3D Vector3D::scaleVector(float factor){
     return Vector3D(x*factor,y*factor,z*factor);
 }
+
+// calculate dotproduct
+float Vector3D::dotProduct(const Vector3D& other) const{
+    return x*other.x + y * other.y + z * other.z;
+}
+
+// calculate crossproduct
+Vector3D Vector3D::crossProduct(const Vector3D& other) const{
+    return Vector3D(
+        y * other.z - z * other.y,
+        z * other.x - x * other.z,
+        x * other.y - y * other.x
+    );
+}
+
+void Vector3D::setVector(float newX, float newY, float newZ) {
+    x = newX;
+    y = newY;
+    z = newZ;
+}
+
 

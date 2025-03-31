@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ik_solver/Vector3D.hpp>
+#include "ik_solver/IKSolver.hpp"
 
 int main()
 {

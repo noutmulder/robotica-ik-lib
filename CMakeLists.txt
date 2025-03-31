@@ -12,3 +12,4 @@ add_executable(ik_project src/main.cpp)
 
 # Koppel de library aan je main programma
 target_link_libraries(ik_project PRIVATE ik_solver)
+target_include_directories(ik_solver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include)

@@ -3,12 +3,14 @@ project(IKProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Voeg de librarymap toe
+# Add the ik_solver library as a subdirectory
 add_subdirectory(ik_solver)
 
 # Main executable
 add_executable(ik_project src/main.cpp)
 
-
-# Koppel de library aan je main programma
+# Link the ik_solver library to the main executable
 target_link_libraries(ik_project PRIVATE ik_solver)
+
+# Include directories for the main executable
+target_include_directories(ik_project PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include)

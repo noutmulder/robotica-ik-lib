@@ -2,6 +2,9 @@
 
 add_library(robot_arm
     src/RobotArm.cpp
+    src/Vector3D.cpp
+    src/Joint.cpp
+    src/Link.cpp
 )
 
 target_include_directories(robot_arm PUBLIC

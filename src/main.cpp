@@ -1,7 +1,7 @@
 #include <iostream>
-#include "../ik_solver/include/Vector3D.hpp"
-#include "../ik_solver/include/Link.hpp"
-#include "../ik_solver/include/Joint.hpp"
+#include "Vector3D.hpp"
+#include "Link.hpp"
+#include "Joint.hpp"
 #include "RobotArm.hpp"
 
 

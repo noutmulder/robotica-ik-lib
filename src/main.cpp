@@ -3,6 +3,7 @@
 #include "Link.hpp"
 #include "Joint.hpp"
 #include "RobotArm.hpp"
+#include "IKSolver.hpp"
 
 
 int main() {

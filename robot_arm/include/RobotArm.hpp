@@ -6,15 +6,21 @@
 #include "Joint.hpp"
 #include <vector>
 #include <iostream>
+#include "ARM_CONFIG.hpp" 
+
+
+class InverseKinematics;
+class IKSolver;
+class Vector3D; 
 
 class RobotArm {
 public:
-    std::vector<Joint> joints;             // Lijst van gewrichten
-    InverseKinematics* ik;                 // Pointer naar inverse kinematica (het object dat de gewrichten beheert)
-    IKSolver* ikSolver;                    // Pointer naar de IK Solver die de berekeningen doet
+    std::vector<Joint> joints;            // Lijst van gewrichten
+    InverseKinematics* ik;                // Pointer naar inverse kinematica
+    IKSolver* ikSolver;               // Pointer naar inverse kinematica solver
 
     // Constructor
-    RobotArm(std::vector<Joint> joints, InverseKinematics* ik, IKSolver* ikSolver);
+    RobotArm();
 
     // Beweeg de arm naar een doelpositie
     void moveTo(Vector3D target);
@@ -22,7 +28,7 @@ public:
     // Draai een gewricht naar een specifieke hoek
     void rotateJoint(int jointIndex, float angle);
 
-    // Fuctie om de end-effector positie te krijgen
+    // Functie om de end-effector positie te krijgen
     Vector3D getEndEffectorPosition();
 };
 

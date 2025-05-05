@@ -2,55 +2,43 @@
 #include <iostream>
 #include "IKSolver.hpp"
 
+// Constructor om de arm met de RobotArm en IK solver te initialiseren
+InverseKinematics::InverseKinematics(RobotArm& arm, IKSolver* solver)
+    : robotArm(arm), ikSolver(solver) {}
 
-// Constructor to initialize joints, links, and IK solver
-InverseKinematics::InverseKinematics(std::vector<Joint> joints, std::vector<Link> links, IKSolver* solver)
-    : joints(joints), links(links), ikSolver(solver) {}
-
-// Moves the end effector to the target position using IK solver
 void InverseKinematics::moveTo(const Vector3D& target) {
-    // if (ikSolver->isReachable(target)) {
-    //     // Solve for the joint angles to reach the target
-    //     std::vector<float> angles = ikSolver->solveIK(target);
+    std::vector<float> angles = ikSolver->solveIK(target);  // Roep de solveIK functie aan van de solver
 
-    //     // Apply the calculated angles to the joints
-    //     for (size_t i = 0; i < joints.size(); ++i) {
-    //         joints[i].setAngle(angles[i]);
-    //     }
-    // } else {
-    //     std::cout << "Target is unreachable!" << std::endl;
-    // }
+    for (size_t i = 0; i < robotArm.joints.size(); ++i) {
+        robotArm.joints[i].setAngle(angles[i]);
+    }
 }
 
-
-// Rotates a specific joint by a given angle
 void InverseKinematics::rotateJoint(int index, float angle) {
-    if (index >= 0 && index < joints.size()) {
-        joints[index].setAngle(angle);
+    if (index >= 0 && index < robotArm.joints.size()) {
+        robotArm.joints[index].setAngle(angle);
     } else {
         std::cout << "Invalid joint index!" << std::endl;
     }
 }
 
-// Gets the current position of the end effector by calculating the position from all joints and links
-Vector3D InverseKinematics::getEndEffector() const {
-    Vector3D endEffectorPos(0, 0, 0);
+Vector3D InverseKinematics::getEndEffector(const std::vector<float>& jointAngles) const {
+    float x = 0.0f, y = 0.0f, z = 0.0f;
+    float currentAngle = 0.0f;
 
-    // Loop through all joints and links to calculate the end effector position
-    for (size_t i = 0; i < joints.size(); ++i) {
-        // Apply the transformation based on joint angles and link lengths
-        // For simplicity, we use a simple forward kinematics model
-        float x = links[i].length * cos(joints[i].angle);
-        float y = links[i].length * sin(joints[i].angle);
-        endEffectorPos.addVector(Vector3D(x, y, 0));  // Simplified 2D movement for now
+    for (size_t i = 0; i < jointAngles.size(); ++i) {
+        Link* currentLink = robotArm.joints[i].link;
+        float length = currentLink->length;
+
+        currentAngle += jointAngles[i];
+
+        x += length * cos(currentAngle);
+        y += length * sin(currentAngle);
     }
 
-    return endEffectorPos;
+    return Vector3D(x, y, z);
 }
 
-// InverseKinematics.cpp
 void InverseKinematics::setJoints(const std::vector<Joint>& newJoints) {
-    joints = newJoints;  // Simply copy the new joints to the current joints
+    robotArm.joints = newJoints;
 }
-
-

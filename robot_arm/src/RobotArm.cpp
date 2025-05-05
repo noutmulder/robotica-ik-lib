@@ -31,3 +31,14 @@ void RobotArm::rotateJoint(int jointIndex, float angle) {
         std::cerr << "Invalid joint index!" << std::endl;
     }
 }
+
+Vector3D RobotArm::getEndEffectorPosition() {
+    // Collect all joint angles
+    std::vector<float> jointAngles;
+    for (const auto& joint : joints) {
+        jointAngles.push_back(joint.angle);  // Collect each joint's current angle
+    }
+
+    // Use the IKSolver to get the position of the end effector
+    return ikSolver->getEndEffector(jointAngles);
+}

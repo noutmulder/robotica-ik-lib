@@ -1,5 +1,7 @@
 #include "InverseKinematics.hpp"
 #include <iostream>
+#include "IKSolver.hpp"
+
 
 // Constructor to initialize joints, links, and IK solver
 InverseKinematics::InverseKinematics(std::vector<Joint> joints, std::vector<Link> links, IKSolver* solver)
@@ -7,18 +9,19 @@ InverseKinematics::InverseKinematics(std::vector<Joint> joints, std::vector<Link
 
 // Moves the end effector to the target position using IK solver
 void InverseKinematics::moveTo(const Vector3D& target) {
-    if (ikSolver->isReachable(target)) {
-        // Solve for the joint angles to reach the target
-        std::vector<float> angles = ikSolver->solveIK(target);
+    // if (ikSolver->isReachable(target)) {
+    //     // Solve for the joint angles to reach the target
+    //     std::vector<float> angles = ikSolver->solveIK(target);
 
-        // Apply the calculated angles to the joints
-        for (size_t i = 0; i < joints.size(); ++i) {
-            joints[i].setAngle(angles[i]);
-        }
-    } else {
-        std::cout << "Target is unreachable!" << std::endl;
-    }
+    //     // Apply the calculated angles to the joints
+    //     for (size_t i = 0; i < joints.size(); ++i) {
+    //         joints[i].setAngle(angles[i]);
+    //     }
+    // } else {
+    //     std::cout << "Target is unreachable!" << std::endl;
+    // }
 }
+
 
 // Rotates a specific joint by a given angle
 void InverseKinematics::rotateJoint(int index, float angle) {
@@ -45,7 +48,9 @@ Vector3D InverseKinematics::getEndEffector() const {
     return endEffectorPos;
 }
 
-// Sets the joints to new positions
+// InverseKinematics.cpp
 void InverseKinematics::setJoints(const std::vector<Joint>& newJoints) {
-    joints = newJoints;
+    joints = newJoints;  // Simply copy the new joints to the current joints
 }
+
+

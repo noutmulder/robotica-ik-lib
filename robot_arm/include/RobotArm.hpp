@@ -21,6 +21,9 @@ public:
 
     // Draai een gewricht naar een specifieke hoek
     void rotateJoint(int jointIndex, float angle);
+
+    // Fuctie om de end-effector positie te krijgen
+    Vector3D getEndEffectorPosition();
 };
 
 #endif // ROBOTARM_HPP

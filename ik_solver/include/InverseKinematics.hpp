@@ -7,6 +7,8 @@
 #include <cmath> 
 #include <vector>
 
+class IKSolver;
+
 class InverseKinematics {
 public:
     std::vector<Joint> joints;      // List of joints
@@ -27,6 +29,6 @@ public:
 
     // Sets the joints to the specified positions
     void setJoints(const std::vector<Joint>& newJoints);
-};
+    };
 
 #endif // INVERSEKINEMATICS_HPP

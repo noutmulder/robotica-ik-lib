@@ -10,25 +10,25 @@ class InverseKinematics;
 
 class IKSolver {
 public:
-    InverseKinematics* arm;       // Reference to the arm (pointer to InverseKinematics)
-    float tolerance;              // How close to the target position
-    int maxIterations;            // Maximum number of iterations
+    InverseKinematics* arm;       // Verwijzing naar de arm (pointer naar InverseKinematics)
+    float tolerance;              // Hoe dicht bij de doelpositie
+    int maxIterations;            // Maximale aantal iteraties
 
-    // Constructor for IKSolver, initialize with arm, tolerance, and max iterations
+    // Constructor voor IKSolver, initialiseert met arm, tolerantie en maximaal aantal iteraties
     IKSolver(InverseKinematics* arm, float tolerance = TOLERANCE, int maxIterations = MAX_ITERATIONS);
 
-    // Solves the inverse kinematics for the given target position
+    // Lost de inverse kinematica op voor de gegeven doelpositie
     std::vector<float> solveIK(const Vector3D& target);
 
-    // Checks if the target is reachable based on the robot's arm and link lengths
+    // Controleert of het doel bereikbaar is op basis van de robotarm en de lengtes van de links
     bool isReachable(const Vector3D& target) const;
 
-    // Clamps angles of joints to make sure they stay within their limits
+    // Beperk de hoeken van gewrichten om ervoor te zorgen dat ze binnen hun grenzen blijven
     void clampAngles(std::vector<float>& angles) const;
 
-    // Additional utility methods
-    void setTolerances(float value);  // Set tolerance
-    void setMaxIterations(int value); // Set max iterations
+    // Extra hulpfuncties
+    void setTolerances(float value);  // Stel de tolerantiewaarde in
+    void setMaxIterations(int value); // Stel het maximale aantal iteraties in
 };
 
 #endif // IKSOLVER_HPP

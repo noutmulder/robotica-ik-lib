@@ -29,6 +29,9 @@ public:
 
     // Sets the joints to the specified positions
     void setJoints(const std::vector<Joint>& newJoints);
+
+    // Sets the joint angles to the specified values
+    void setJointAngles(const std::vector<float>& angles);
 };
 
 #endif // INVERSEKINEMATICS_HPP

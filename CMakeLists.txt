@@ -3,13 +3,18 @@ project(IKProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Voeg de librarymap toe
+# Add the ik_solver and robot_arm libraries as subdirectories
 add_subdirectory(ik_solver)
+add_subdirectory(robot_arm)
 
 # Main executable
 add_executable(ik_project src/main.cpp)
 
+# Link the ik_solver and robot_arm libraries to the main executable
+target_link_libraries(ik_project PRIVATE ik_solver robot_arm)
 
-# Koppel de library aan je main programma
-target_link_libraries(ik_project PRIVATE ik_solver)
-target_include_directories(ik_solver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include)
+# Include directories for the main executable
+target_include_directories(ik_project PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include  # Add robot_arm include directory
+)

@@ -1,9 +1,10 @@
-# Maak de library van alle .cpp bestanden
-file(GLOB LIB_SOURCES src/*.cpp)
-file(GLOB LIB_HEADERS include/ik_solver/*.hpp)
+# Create the static library for ik_solver
+add_library(ik_solver STATIC
+    src/IKSolver.cpp
+    src/InverseKinematics.cpp
+)
 
-# Maak de ik_solver library van de .cpp bestanden
-add_library(ik_solver ${LIB_SOURCES})
-
-# Zorg dat de headers beschikbaar zijn voor projecten die deze library gebruiken
-target_include_directories(ik_solver PUBLIC include)
+# Make the include directories public, so the main project can find them
+target_include_directories(ik_solver PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)

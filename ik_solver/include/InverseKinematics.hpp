@@ -32,6 +32,9 @@ public:
 
     // Sets the joint angles to the specified values
     void setJointAngles(const std::vector<float>& angles);
+
+    // Functie om de gewrichtshoeken te krijgen
+    std::vector<float> getJointAngles() const;
 };
 
 #endif // INVERSEKINEMATICS_HPP

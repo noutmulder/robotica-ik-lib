@@ -58,3 +58,16 @@ void InverseKinematics::setJointAngles(const std::vector<float> &angles)
         robotArm.joints[i].setAngle(angles[i]);
     }
 }
+
+std::vector<float> InverseKinematics::getJointAngles() const
+{
+    std::vector<float> angles;
+    angles.reserve(robotArm.joints.size());
+
+    for (const auto &joint : robotArm.joints)
+    {
+        angles.push_back(joint.getAngle());
+    }
+
+    return angles;
+}

@@ -19,6 +19,8 @@ public:
 
     // Zet de hoek van het gewricht, als binnen de grenzen
     void setAngle(float newAngle);
+
+    float getAngle() const;
 };
 
 #endif

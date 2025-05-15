@@ -17,3 +17,8 @@ void Joint::setAngle(float newAngle) {
         std::cout << "Angle out of range!" << std::endl;
     }
 }
+
+// Haal de huidige hoek van het gewricht op
+float Joint::getAngle() const {
+    return angle;
+}

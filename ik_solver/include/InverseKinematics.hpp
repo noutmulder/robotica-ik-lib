@@ -31,7 +31,7 @@ public:
     void setJoints(const std::vector<Joint>& newJoints);
 
     // Sets the joint angles to the specified values
-    void setJointAngles(const std::vector<float>& angles);
+    bool setJointAngles(const std::vector<float>& angles);
 
     // Functie om de gewrichtshoeken te krijgen
     std::vector<float> getJointAngles() const;

@@ -50,14 +50,41 @@ void InverseKinematics::setJoints(const std::vector<Joint> &newJoints)
     robotArm.joints = newJoints;
 }
 
-void InverseKinematics::setJointAngles(const std::vector<float> &angles)
+bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
 {
     size_t n = std::min(angles.size(), robotArm.joints.size());
+
+    // First, validate all the angles
     for (size_t i = 0; i < n; ++i)
     {
-        robotArm.joints[i].setAngle(angles[i]);
+        float minAngle = robotArm.joints[i].minAngle;
+        float maxAngle = robotArm.joints[i].maxAngle;
+
+        if (angles[i] < minAngle || angles[i] > maxAngle) {
+            std::cout << "Joint[" << i << "] out of range! (" << angles[i] << "° not in ["
+                      << minAngle << "°, " << maxAngle << "°])\n";
+            return false;
+        }
     }
+
+    // If all angles are valid, apply them
+    for (size_t i = 0; i < n; ++i)
+    {
+        float before = robotArm.joints[i].getAngle();
+        robotArm.joints[i].setAngle(angles[i]);
+        float after = robotArm.joints[i].getAngle();
+
+        if (before != after) {
+            std::cout << "Joint[" << i << "] updated from " << before << "° to " << after << "°\n";
+        } else {
+            std::cout << "Joint[" << i << "] remains unchanged at " << after << "°\n";
+        }
+    }
+
+    return true;
 }
+
+
 
 std::vector<float> InverseKinematics::getJointAngles() const
 {

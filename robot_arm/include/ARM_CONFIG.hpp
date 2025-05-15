@@ -20,16 +20,21 @@
 
 // Definities voor de hoeken van de gewrichten in graden
 #define JOINT1_MIN_ANGLE 0.0f
-#define JOINT1_MAX_ANGLE 180.0f
-#define JOINT2_MIN_ANGLE -90.0f
-#define JOINT2_MAX_ANGLE 90.0f
+#define JOINT1_MAX_ANGLE 250.0f
+
+#define JOINT2_MIN_ANGLE -70.5f
+#define JOINT2_MAX_ANGLE 70.5f
+
 #define JOINT3_MIN_ANGLE -90.0f
 #define JOINT3_MAX_ANGLE 90.0f
-#define JOINT4_MIN_ANGLE -90.0f
-#define JOINT4_MAX_ANGLE 90.0f
+
+#define JOINT4_MIN_ANGLE -106.0f
+#define JOINT4_MAX_ANGLE 106.0f
+
 #define JOINT5_MIN_ANGLE -90.0f
 #define JOINT5_MAX_ANGLE 90.0f
-#define JOINT6_MIN_ANGLE -90.0f
-#define JOINT6_MAX_ANGLE 90.0f
+
+#define JOINT6_MIN_ANGLE -180.0f 
+#define JOINT6_MAX_ANGLE 180.0f 
 
 #endif

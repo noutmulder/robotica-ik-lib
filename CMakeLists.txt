@@ -16,5 +16,17 @@ target_link_libraries(ik_project PRIVATE ik_solver robot_arm)
 # Include directories for the main executable
 target_include_directories(ik_project PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include  # Add robot_arm include directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include
+)
+
+# ✅ **Nieuwe executable voor main_fk_tester**
+add_executable(main_fk_tester src/main_fk_tester.cpp)
+
+# Link de libraries
+target_link_libraries(main_fk_tester PRIVATE ik_solver robot_arm)
+
+# Include directories voor de nieuwe executable
+target_include_directories(main_fk_tester PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include
 )

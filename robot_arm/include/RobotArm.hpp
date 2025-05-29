@@ -7,6 +7,9 @@
 #include <vector>
 #include <iostream>
 #include "ARM_CONFIG.hpp" 
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 
 class InverseKinematics;
@@ -31,5 +34,7 @@ public:
     // Functie om de end-effector positie te krijgen
     Vector3D getEndEffectorPosition();
 };
+
+Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation);
 
 #endif // ROBOTARM_HPP

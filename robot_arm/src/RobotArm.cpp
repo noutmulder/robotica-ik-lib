@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 
+
 // Constructor: Initialiseer de gewrichten, inverse kinematica en solver
 RobotArm::RobotArm()
 {
@@ -71,7 +72,6 @@ void RobotArm::rotateJoint(int jointIndex, float angle)
 }
 
 
-
 Vector3D RobotArm::getEndEffectorPosition()
 {
     // Startpositie van de end effector
@@ -112,4 +112,18 @@ Vector3D RobotArm::getEndEffectorPosition()
 
     return position;
 }
+
+// Maakt een 4x4 matrix uit RPY (in radialen) + translatie
+Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation) {
+    Matrix3f rotation;
+    rotation = AngleAxisf(rpy.z, Vector3f::UnitZ()) *
+               AngleAxisf(rpy.y, Vector3f::UnitY()) *
+               AngleAxisf(rpy.x, Vector3f::UnitX());
+
+    Matrix4f transform = Matrix4f::Identity();
+    transform.block<3,3>(0,0) = rotation;
+    transform.block<3,1>(0,3) = Vector3f(translation.x, translation.y, translation.z);
+    return transform;
+}
+
 

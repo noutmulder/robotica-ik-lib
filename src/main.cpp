@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#include <Eigen/Dense>
+
 
 void printEndEffectorPosition(const Vector3D& position, const std::string& label) {
     std::cout << label << ": ("

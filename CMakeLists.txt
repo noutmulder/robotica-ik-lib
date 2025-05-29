@@ -3,29 +3,42 @@ project(IKProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Add the ik_solver and robot_arm libraries as subdirectories
+# --------------------------------------
+# Zoek naar Eigen3
+# --------------------------------------
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
+if (NOT Eigen3_FOUND)
+    message(FATAL_ERROR "Eigen3 is not found. Please install it with your package manager (e.g. sudo apt install libeigen3-dev)")
+endif()
+
+# --------------------------------------
+# Voeg de subdirectories toe
+# --------------------------------------
 add_subdirectory(ik_solver)
 add_subdirectory(robot_arm)
 
+# --------------------------------------
 # Main executable
+# --------------------------------------
 add_executable(ik_project src/main.cpp)
 
-# Link the ik_solver and robot_arm libraries to the main executable
-target_link_libraries(ik_project PRIVATE ik_solver robot_arm)
+# Link de benodigde libraries
+target_link_libraries(ik_project PRIVATE ik_solver robot_arm Eigen3::Eigen)
 
-# Include directories for the main executable
+# Include directories
 target_include_directories(ik_project PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include
     ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include
 )
 
-# ✅ **Nieuwe executable voor main_fk_tester**
+# --------------------------------------
+# Executable voor FK test
+# --------------------------------------
 add_executable(main_fk_tester src/main_fk_tester.cpp)
 
-# Link de libraries
-target_link_libraries(main_fk_tester PRIVATE ik_solver robot_arm)
+target_link_libraries(main_fk_tester PRIVATE ik_solver robot_arm Eigen3::Eigen)
 
-# Include directories voor de nieuwe executable
 target_include_directories(main_fk_tester PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/ik_solver/include
     ${CMAKE_CURRENT_SOURCE_DIR}/robot_arm/include

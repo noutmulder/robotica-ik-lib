@@ -17,6 +17,7 @@ public:
 
     IKSolver(RobotArm* arm, float tolerance = TOLERANCE, int maxIterations = MAX_ITERATIONS);
     std::vector<float> solveIK(const Vector3D& target);
+    Vector3D getEndEffector(const std::vector<float>& jointAngles) const;
 };
 
 #endif // IKSOLVER_HPP

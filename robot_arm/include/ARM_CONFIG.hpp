@@ -37,4 +37,30 @@
 #define JOINT6_MIN_ANGLE -177.62f
 #define JOINT6_MAX_ANGLE 177.62f
 
+// === JOINT ORIGINS, RPY AND AXES (uit URDF) ===
+const Vector3D JOINT1_ORIGIN(0.0f, 0.0f, 0.0f);
+const Vector3D JOINT1_RPY(0.0f, 0.0f, 0.0f);
+const Vector3D JOINT1_AXIS(0.0f, 0.0f, 1.0f);
+
+const Vector3D JOINT2_ORIGIN(0.02342f, 0.0f, 0.1105f);
+const Vector3D JOINT2_RPY(-1.5708f, 0.0f, 0.0f);
+const Vector3D JOINT2_AXIS(0.0f, 0.0f, 1.0f);
+
+const Vector3D JOINT3_ORIGIN(0.0f, -0.18f, 0.0f);
+const Vector3D JOINT3_RPY(3.1416f, 0.0f, -1.5708f);
+const Vector3D JOINT3_AXIS(0.0f, 0.0f, -1.0f);
+
+const Vector3D JOINT4_ORIGIN(0.0435f, 0.0f, 0.0f);
+const Vector3D JOINT4_RPY(1.5708f, 0.0f, 3.1416f);
+const Vector3D JOINT4_AXIS(0.0f, 0.0f, -1.0f);
+
+const Vector3D JOINT5_ORIGIN(0.0f, 0.0f, -0.17635f);
+const Vector3D JOINT5_RPY(-1.5708f, 0.0f, 0.0f);
+const Vector3D JOINT5_AXIS(0.0f, 0.0f, -1.0f);
+
+const Vector3D JOINT6_ORIGIN(0.0f, 0.0f, 0.0f);
+const Vector3D JOINT6_RPY(1.5708f, 0.0f, 0.0f);
+const Vector3D JOINT6_AXIS(0.0f, 0.0f, -1.0f);
+
+
 #endif

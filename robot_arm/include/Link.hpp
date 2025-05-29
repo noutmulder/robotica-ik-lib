@@ -8,13 +8,12 @@ class Link {
 public:
     float length;   // Lengte van de link
     float mass;     // Massa van de link
-    Vector3D position;  // Positie van de link in de ruimte
 
     // Constructor voor de link
-    Link(float len, float m, Vector3D pos);
+    Link(float len, float m);
 
     // Print de details van de link
-    void describeLink();
+    void describeLink() const;
 };
 
 #endif

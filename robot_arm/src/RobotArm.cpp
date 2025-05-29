@@ -1,17 +1,37 @@
 #include "RobotArm.hpp"
 #include "Joint.hpp"
 #include "Vector3D.hpp"
+#include "RobotArm.hpp"
+#include <cmath>
+#include <vector>
 
 // Constructor: Initialiseer de gewrichten, inverse kinematica en solver
 RobotArm::RobotArm()
 {
     joints = std::vector<Joint>{
-        Joint(0.0f, JOINT1_MIN_ANGLE, JOINT1_MAX_ANGLE, new Link(LINK1_LENGTH, LINK1_WEIGHT, Vector3D(0, 0, 0))),
-        Joint(0.0f, JOINT2_MIN_ANGLE, JOINT2_MAX_ANGLE, new Link(LINK2_LENGTH, LINK2_WEIGHT, Vector3D(0, 0, 0))),
-        Joint(0.0f, JOINT3_MIN_ANGLE, JOINT3_MAX_ANGLE, new Link(LINK3_LENGTH, LINK3_WEIGHT, Vector3D(0, 0, 0))),
-        Joint(0.0f, JOINT4_MIN_ANGLE, JOINT4_MAX_ANGLE, new Link(LINK4_LENGTH, LINK4_WEIGHT, Vector3D(0, 0, 0))),
-        Joint(0.0f, JOINT5_MIN_ANGLE, JOINT5_MAX_ANGLE, new Link(LINK5_LENGTH, LINK5_WEIGHT, Vector3D(0, 0, 0))),
-        Joint(0.0f, JOINT6_MIN_ANGLE, JOINT6_MAX_ANGLE, new Link(LINK6_LENGTH, LINK6_WEIGHT, Vector3D(0, 0, 0))),
+        Joint(0.0f, JOINT1_MIN_ANGLE, JOINT1_MAX_ANGLE,
+              new Link(LINK1_LENGTH, LINK1_WEIGHT),
+              JOINT1_ORIGIN, JOINT1_RPY, JOINT1_AXIS),
+
+        Joint(0.0f, JOINT2_MIN_ANGLE, JOINT2_MAX_ANGLE,
+              new Link(LINK2_LENGTH, LINK2_WEIGHT),
+              JOINT2_ORIGIN, JOINT2_RPY, JOINT2_AXIS),
+
+        Joint(0.0f, JOINT3_MIN_ANGLE, JOINT3_MAX_ANGLE,
+              new Link(LINK3_LENGTH, LINK3_WEIGHT),
+              JOINT3_ORIGIN, JOINT3_RPY, JOINT3_AXIS),
+
+        Joint(0.0f, JOINT4_MIN_ANGLE, JOINT4_MAX_ANGLE,
+              new Link(LINK4_LENGTH, LINK4_WEIGHT),
+              JOINT4_ORIGIN, JOINT4_RPY, JOINT4_AXIS),
+
+        Joint(0.0f, JOINT5_MIN_ANGLE, JOINT5_MAX_ANGLE,
+              new Link(LINK5_LENGTH, LINK5_WEIGHT),
+              JOINT5_ORIGIN, JOINT5_RPY, JOINT5_AXIS),
+
+        Joint(0.0f, JOINT6_MIN_ANGLE, JOINT6_MAX_ANGLE,
+              new Link(LINK6_LENGTH, LINK6_WEIGHT),
+              JOINT6_ORIGIN, JOINT6_RPY, JOINT6_AXIS),
     };
 
     ikSolver = new IKSolver(this);
@@ -50,10 +70,7 @@ void RobotArm::rotateJoint(int jointIndex, float angle)
     }
 }
 
-#include "Vector3D.hpp"
-#include "RobotArm.hpp"
-#include <cmath>
-#include <vector>
+
 
 Vector3D RobotArm::getEndEffectorPosition()
 {

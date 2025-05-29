@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <Eigen/Dense>
 
 class Vector3D
 {
@@ -17,4 +18,9 @@ public:
     Vector3D crossProduct(const Vector3D &other) const;
     void setVector(float newX, float newY, float newZ);
     void printVector();
+
+    // Converteer tussen Eigen en Vector3D
+    Eigen::Vector3f toEigen() const;
+    static Vector3D fromEigen(const Eigen::Vector3f& vec);
+
 };

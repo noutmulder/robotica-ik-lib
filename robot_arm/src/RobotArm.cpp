@@ -4,6 +4,9 @@
 #include "RobotArm.hpp"
 #include <cmath>
 #include <vector>
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 
 // Constructor: Initialiseer de gewrichten, inverse kinematica en solver
@@ -72,57 +75,46 @@ void RobotArm::rotateJoint(int jointIndex, float angle)
 }
 
 
-Vector3D RobotArm::getEndEffectorPosition()
-{
-    // Startpositie van de end effector
-    Vector3D position(0.0f, 0.0f, 0.0f);
+Vector3D RobotArm::getEndEffectorPosition() {
+    // Begin met de identiteitsmatrix (geen rotatie/translatie)
+    Matrix4f currentTransform = Matrix4f::Identity();
 
-    // Houd de accumulatie van rotatie bij
-    float accumulatedThetaX = 0.0f;
-    float accumulatedThetaY = 0.0f;
-    float accumulatedThetaZ = 0.0f;
+    for (const Joint& joint : joints) {
+        // 1. Basistransformatie uit URDF (origin + rpy)
+        Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
 
-    // Itereer door alle gewrichten
-    for (size_t i = 0; i < joints.size(); ++i) {
-        // Verkrijg de huidige hoek in radialen
-        float angleRad = joints[i].getAngle() * (M_PI / 180.0f);
+        // 2. Extra rotatie om de joint-as (de eigenlijke joint-rotatie)
+        float angleRad = joint.getAngle() * (M_PI / 180.0f);
+        Vector3f axis = joint.axis.toEigen().normalized();
+        Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
 
-        // Verkrijg de lengte van de link
-        float length = joints[i].link->length;
+        // Zet om naar een 4x4 matrix
+        Matrix4f jointRotation = Matrix4f::Identity();
+        jointRotation.block<3,3>(0,0) = jointRotMatrix;
 
-        // Update de totale rotatie
-        if (i == 0) {
-            accumulatedThetaY += angleRad;  // Eerste joint roteert om Y-as
-        } else if (i == 1) {
-            accumulatedThetaZ += angleRad;  // Tweede joint roteert om Z-as
-        } else if (i == 2) {
-            accumulatedThetaX += angleRad;  // Derde joint roteert om X-as
-        }
-
-        // Bereken de nieuwe positie op basis van de rotatie
-        float x = length * cos(accumulatedThetaY) * cos(accumulatedThetaZ);
-        float y = length * sin(accumulatedThetaY) * cos(accumulatedThetaX);
-        float z = length * sin(accumulatedThetaX);
-
-        // Accumuleer de positie
-        position.x += x;
-        position.y += y;
-        position.z += z;
+        // 3. Combineer: transform * base * rotatie
+        currentTransform = currentTransform * baseTransform * jointRotation;
     }
 
-    return position;
+    // Extract de positie van de end-effector uit de matrix (laatste kolom)
+    Vector3f endPos = currentTransform.block<3,1>(0,3);
+    return Vector3D(endPos.x(), endPos.y(), endPos.z());
 }
 
-// Maakt een 4x4 matrix uit RPY (in radialen) + translatie
-Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation) {
-    Matrix3f rotation;
-    rotation = AngleAxisf(rpy.z, Vector3f::UnitZ()) *
-               AngleAxisf(rpy.y, Vector3f::UnitY()) *
-               AngleAxisf(rpy.x, Vector3f::UnitX());
 
-    Matrix4f transform = Matrix4f::Identity();
+// Maakt een 4x4 transformatiematrix uit RPY (in radialen) + translatie
+Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation) {
+    // Bereken rotatiematrix vanuit RPY (in radialen)
+    Eigen::Matrix3f rotation;
+    rotation = Eigen::AngleAxisf(rpy.z, Eigen::Vector3f::UnitZ()) *
+               Eigen::AngleAxisf(rpy.y, Eigen::Vector3f::UnitY()) *
+               Eigen::AngleAxisf(rpy.x, Eigen::Vector3f::UnitX());
+
+    // Bouw de volledige 4x4 matrix
+    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
     transform.block<3,3>(0,0) = rotation;
-    transform.block<3,1>(0,3) = Vector3f(translation.x, translation.y, translation.z);
+    transform.block<3,1>(0,3) = translation.toEigen();
+
     return transform;
 }
 

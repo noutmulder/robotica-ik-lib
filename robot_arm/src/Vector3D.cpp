@@ -75,3 +75,12 @@ void Vector3D::setVector(float newX, float newY, float newZ) {
 }
 
 
+Eigen::Vector3f Vector3D::toEigen() const {
+    return Eigen::Vector3f(x, y, z);
+}
+
+Vector3D Vector3D::fromEigen(const Eigen::Vector3f& vec) {
+    return Vector3D(vec.x(), vec.y(), vec.z());
+}
+
+

@@ -21,6 +21,5 @@ public:
 
     // Converteer tussen Eigen en Vector3D
     Eigen::Vector3f toEigen() const;
-    static Vector3D fromEigen(const Eigen::Vector3f& vec);
-
+    static Vector3D fromEigen(const Eigen::Vector3f &vec);
 };

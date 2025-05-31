@@ -6,21 +6,21 @@
 #include "Joint.hpp"
 #include <vector>
 #include <iostream>
-#include "ARM_CONFIG.hpp" 
+#include "ARM_CONFIG.hpp"
 #include <Eigen/Dense>
 
 using namespace Eigen;
 
-
 class InverseKinematics;
 class IKSolver;
-class Vector3D; 
+class Vector3D;
 
-class RobotArm {
+class RobotArm
+{
 public:
-    std::vector<Joint> joints;            // Lijst van gewrichten
-    InverseKinematics* ik;                // Pointer naar inverse kinematica
-    IKSolver* ikSolver;               // Pointer naar inverse kinematica solver
+    std::vector<Joint> joints; // Lijst van gewrichten
+    InverseKinematics *ik;     // Pointer naar inverse kinematica
+    IKSolver *ikSolver;        // Pointer naar inverse kinematica solver
 
     // Constructor
     RobotArm();
@@ -35,6 +35,6 @@ public:
     Vector3D getEndEffectorPosition();
 };
 
-Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation);
+Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation);
 
 #endif // ROBOTARM_HPP

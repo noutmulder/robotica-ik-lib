@@ -2,14 +2,14 @@
 #define ARM_CONFIG_HPP
 
 // Lengtes van de links in mm (omgezet van meters in parse_urdf output)
-#define LINK1_LENGTH 0.0f       // base_joint heeft geen lengte (fixed joint)
-#define LINK2_LENGTH 113.0f     // L2: 0.113 m → 113 mm
-#define LINK3_LENGTH 180.0f     // L3: 0.180 m → 180 mm
-#define LINK4_LENGTH 43.5f      // L4: 0.0435 m → 43.5 mm
-#define LINK5_LENGTH 176.0f     // L5: 0.176 m → 176 mm
-#define LINK6_LENGTH 0.0f       // L6: 0.000 m → 0 mm (waarschijnlijk end effector)
+#define LINK1_LENGTH 0.0f   // base_joint heeft geen lengte (fixed joint)
+#define LINK2_LENGTH 113.0f // L2: 0.113 m → 113 mm
+#define LINK3_LENGTH 180.0f // L3: 0.180 m → 180 mm
+#define LINK4_LENGTH 43.5f  // L4: 0.0435 m → 43.5 mm
+#define LINK5_LENGTH 176.0f // L5: 0.176 m → 176 mm
+#define LINK6_LENGTH 0.0f   // L6: 0.000 m → 0 mm (waarschijnlijk end effector)
 
-#define LINK1_WEIGHT 1.0f       // Gewicht onbekend, laat zoals het was
+#define LINK1_WEIGHT 1.0f // Gewicht onbekend, laat zoals het was
 #define LINK2_WEIGHT 1.0f
 #define LINK3_WEIGHT 1.0f
 #define LINK4_WEIGHT 1.0f
@@ -63,6 +63,5 @@ const Vector3D JOINT5_AXIS(0.0f, 0.0f, -1.0f);
 const Vector3D JOINT6_ORIGIN(0.0f, 0.0f, 0.0f);
 const Vector3D JOINT6_RPY(1.5708f, 0.0f, 0.0f);
 const Vector3D JOINT6_AXIS(0.0f, 0.0f, -1.0f);
-
 
 #endif

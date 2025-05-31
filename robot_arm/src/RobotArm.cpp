@@ -8,7 +8,6 @@
 
 using namespace Eigen;
 
-
 // Constructor: Initialiseer de gewrichten, inverse kinematica en solver
 RobotArm::RobotArm()
 {
@@ -74,49 +73,37 @@ void RobotArm::rotateJoint(int jointIndex, float angle)
     }
 }
 
-
-Vector3D RobotArm::getEndEffectorPosition() {
+Vector3D RobotArm::getEndEffectorPosition()
+{
     // Begin met de identiteitsmatrix (geen rotatie/translatie)
     Matrix4f currentTransform = Matrix4f::Identity();
 
-    for (size_t i = 0; i < joints.size(); ++i) {
-    const Joint& joint = joints[i];
+    for (size_t i = 0; i < joints.size(); ++i)
+    {
+        const Joint &joint = joints[i];
 
-    // Basis URDF transformatie (origin + rpy)
-    Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
+        // Basis URDF transformatie (origin + rpy)
+        Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
 
-    // Eigenlijke rotatie (om de joint-as)
-    float angleRad = joint.getAngle() * (M_PI / 180.0f);
-    Vector3f axis = joint.axis.toEigen().normalized();
-    Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
+        // Eigenlijke rotatie (om de joint-as)
+        float angleRad = joint.getAngle() * (M_PI / 180.0f);
+        Vector3f axis = joint.axis.toEigen().normalized();
+        Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
 
-    Matrix4f jointRotation = Matrix4f::Identity();
-    jointRotation.block<3,3>(0,0) = jointRotMatrix;
+        Matrix4f jointRotation = Matrix4f::Identity();
+        jointRotation.block<3, 3>(0, 0) = jointRotMatrix;
 
-    // Combineer met huidige transformatie
-    currentTransform = currentTransform * baseTransform * jointRotation;
-
-    // Debug: print info per joint
-    // std::cout << "\nJoint[" << i << "] hoek = " << joint.getAngle() << "° (" << angleRad << " rad)\n";
-    // std::cout << "→ Axis: (" << axis.x() << ", " << axis.y() << ", " << axis.z() << ")\n";
-// 
-    // std::cout << "→ BaseTransform:\n" << baseTransform << "\n";
-    // std::cout << "→ JointRotation:\n" << jointRotation << "\n";
-    // std::cout << "→ Cumulatieve Transform:\n" << currentTransform << "\n";
-// 
-    // Vector3f trans = currentTransform.block<3,1>(0,3);
-    // std::cout << "→ Translatie tot nu toe: (" << trans.x() << ", " << trans.y() << ", " << trans.z() << ")\n";
-}
-
-
+        // Combineer met huidige transformatie
+        currentTransform = currentTransform * baseTransform * jointRotation;
+    }
     // Extract de positie van de end-effector uit de matrix (laatste kolom)
-    Vector3f endPos = currentTransform.block<3,1>(0,3);
+    Vector3f endPos = currentTransform.block<3, 1>(0, 3);
     return Vector3D(endPos.x(), endPos.y(), endPos.z());
 }
 
-
 // Maakt een 4x4 transformatiematrix uit RPY (in radialen) + translatie
-Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3D& translation) {
+Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation)
+{
     // Bereken rotatiematrix vanuit RPY (in radialen)
     Eigen::Matrix3f rotation;
     rotation = Eigen::AngleAxisf(rpy.z, Eigen::Vector3f::UnitZ()) *
@@ -125,10 +112,8 @@ Matrix4f createTransformFromRPYAndTranslation(const Vector3D& rpy, const Vector3
 
     // Bouw de volledige 4x4 matrix
     Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
-    transform.block<3,3>(0,0) = rotation;
-    transform.block<3,1>(0,3) = translation.toEigen();
+    transform.block<3, 3>(0, 0) = rotation;
+    transform.block<3, 1>(0, 3) = translation.toEigen();
 
     return transform;
 }
-
-

@@ -28,11 +28,13 @@ void InverseKinematics::rotateJoint(int index, float angle)
     }
 }
 
-Vector3D InverseKinematics::getEndEffector(const std::vector<float>& jointAngles) const {
+Vector3D InverseKinematics::getEndEffector(const std::vector<float> &jointAngles) const
+{
     float x = 0.0f, y = 0.0f, z = 0.0f;
     float theta = 0.0f; // Accumulated rotation in radians
 
-    for (size_t i = 0; i < jointAngles.size(); ++i) {
+    for (size_t i = 0; i < jointAngles.size(); ++i)
+    {
         float angleRad = jointAngles[i] * (M_PI / 180.0f); // Degrees to radians
         theta += angleRad;
 
@@ -43,7 +45,6 @@ Vector3D InverseKinematics::getEndEffector(const std::vector<float>& jointAngles
 
     return Vector3D(x, y, z);
 }
-
 
 void InverseKinematics::setJoints(const std::vector<Joint> &newJoints)
 {
@@ -60,10 +61,13 @@ bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
         float maxAngle = robotArm.joints[i].maxAngle;
         float target = angles[i];
 
-        if (target < minAngle) {
+        if (target < minAngle)
+        {
             std::cout << "Joint[" << i << "] below minimum! (" << target << "° → " << minAngle << "°)\n";
             target = minAngle;
-        } else if (target > maxAngle) {
+        }
+        else if (target > maxAngle)
+        {
             std::cout << "Joint[" << i << "] above maximum! (" << target << "° → " << maxAngle << "°)\n";
             target = maxAngle;
         }
@@ -72,19 +76,18 @@ bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
         robotArm.joints[i].setAngle(target);
         float after = robotArm.joints[i].getAngle();
 
-        if (std::abs(before - after) > 1e-5f) {
+        if (std::abs(before - after) > 1e-5f)
+        {
             std::cout << "Joint[" << i << "] updated from " << before << "° to " << after << "°\n";
-        } else {
+        }
+        else
+        {
             std::cout << "Joint[" << i << "] remains unchanged at " << after << "°\n";
         }
     }
 
     return true;
 }
-
-
-
-
 
 std::vector<float> InverseKinematics::getJointAngles() const
 {

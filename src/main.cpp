@@ -15,7 +15,6 @@ void printEndEffectorPosition(const Vector3D &position, const std::string &label
               << position.z << ")\n";
 }
 
-
 void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::string &filename)
 {
     std::ofstream outfile(filename);
@@ -38,7 +37,6 @@ void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::stri
     outfile.close();
 }
 
-
 int main()
 {
     std::cout << "Running writing test...\n";
@@ -47,16 +45,23 @@ int main()
     RobotArm robotArm;
 
     // Definieer de hoeken voor alle joints (allemaal 0.0)
-    std::vector<float> fixedJointAngles = {90.0f, 50.0f, 20.0f, -5.0f, -45.0f, -90.0f};
+    std::vector<float> fixedJointAngles = {-180.0f, -180.0f, -180.0f, -180.0f, -180.0f, -180.0f};
     // std::vector<float> fixedJointAngles2 = {M_PIf/4, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     // Zet deze hoeken in de robotarm
     if (robotArm.ik->setJointAngles(fixedJointAngles))
     {
-        // Schrijf de hoeken weg naar bestand
         std::string filename = "/home/nout/ros2_ws/joints.txt";
-        writeToFile(fixedJointAngles, filename);
-    }; // Belangrijk: deze functie valideert én zet de hoeken
+
+        // Haal de actuele hoeken op uit de robot
+        std::vector<float> clampedAngles;
+        for (const Joint &joint : robotArm.joints)
+        {
+            clampedAngles.push_back(joint.getAngle());
+        }
+
+        writeToFile(clampedAngles, filename);
+    } // Belangrijk: deze functie valideert én zet de hoeken
 
     // Bereken en print de end-effector positie
     Vector3D endEffector = robotArm.getEndEffectorPosition();

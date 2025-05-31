@@ -15,7 +15,8 @@ void printEndEffectorPosition(const Vector3D &position, const std::string &label
               << position.z << ")\n";
 }
 
-void writeToFile(const std::vector<float> &jointAngles, const std::string &filename)
+
+void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::string &filename)
 {
     std::ofstream outfile(filename);
     if (!outfile)
@@ -24,17 +25,19 @@ void writeToFile(const std::vector<float> &jointAngles, const std::string &filen
         return;
     }
 
-    // Schrijf alle joint waarden, gescheiden door komma's
-    for (size_t i = 0; i < jointAngles.size(); ++i)
+    // Zet elke hoek om van graden naar radialen en schrijf naar bestand
+    for (size_t i = 0; i < jointAnglesInDegrees.size(); ++i)
     {
-        outfile << jointAngles[i];
-        if (i != jointAngles.size() - 1)
+        float radians = jointAnglesInDegrees[i] * (M_PI / 180.0f);
+        outfile << radians;
+        if (i != jointAnglesInDegrees.size() - 1)
             outfile << ",";
     }
     outfile << std::endl;
 
     outfile.close();
 }
+
 
 int main()
 {
@@ -44,7 +47,8 @@ int main()
     RobotArm robotArm;
 
     // Definieer de hoeken voor alle joints (allemaal 0.0)
-    std::vector<float> fixedJointAngles = {0.0f, 3.14f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> fixedJointAngles = {90.0f, 50.0f, 20.0f, -5.0f, -45.0f, -90.0f};
+    // std::vector<float> fixedJointAngles2 = {M_PIf/4, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     // Zet deze hoeken in de robotarm
     if (robotArm.ik->setJointAngles(fixedJointAngles))
@@ -56,7 +60,7 @@ int main()
 
     // Bereken en print de end-effector positie
     Vector3D endEffector = robotArm.getEndEffectorPosition();
-    printEndEffectorPosition(endEffector, "End-effector positie bij hoeken 0");
+    printEndEffectorPosition(endEffector, "End-effector positie");
 
     return 0;
 }

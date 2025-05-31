@@ -48,10 +48,12 @@ const Vector3D JOINT2_AXIS(0.0f, 0.0f, 1.0f);
 
 const Vector3D JOINT3_ORIGIN(0.0f, -0.18f, 0.0f);
 const Vector3D JOINT3_RPY(3.1416f, 0.0f, -1.5708f);
+// const Vector3D JOINT3_RPY(0.0f, 0.0f, 0.0f);
 const Vector3D JOINT3_AXIS(0.0f, 0.0f, -1.0f);
 
 const Vector3D JOINT4_ORIGIN(0.0435f, 0.0f, 0.0f);
 const Vector3D JOINT4_RPY(1.5708f, 0.0f, 3.1416f);
+// const Vector3D JOINT4_RPY(0.0f, 0.0f, 0.0f);
 const Vector3D JOINT4_AXIS(0.0f, 0.0f, -1.0f);
 
 const Vector3D JOINT5_ORIGIN(0.0f, 0.0f, -0.17635f);

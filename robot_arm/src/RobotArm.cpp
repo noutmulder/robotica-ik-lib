@@ -79,22 +79,35 @@ Vector3D RobotArm::getEndEffectorPosition() {
     // Begin met de identiteitsmatrix (geen rotatie/translatie)
     Matrix4f currentTransform = Matrix4f::Identity();
 
-    for (const Joint& joint : joints) {
-        // 1. Basistransformatie uit URDF (origin + rpy)
-        Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
+    for (size_t i = 0; i < joints.size(); ++i) {
+    const Joint& joint = joints[i];
 
-        // 2. Extra rotatie om de joint-as (de eigenlijke joint-rotatie)
-        float angleRad = joint.getAngle() * (M_PI / 180.0f);
-        Vector3f axis = joint.axis.toEigen().normalized();
-        Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
+    // Basis URDF transformatie (origin + rpy)
+    Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
 
-        // Zet om naar een 4x4 matrix
-        Matrix4f jointRotation = Matrix4f::Identity();
-        jointRotation.block<3,3>(0,0) = jointRotMatrix;
+    // Eigenlijke rotatie (om de joint-as)
+    float angleRad = joint.getAngle() * (M_PI / 180.0f);
+    Vector3f axis = joint.axis.toEigen().normalized();
+    Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
 
-        // 3. Combineer: transform * base * rotatie
-        currentTransform = currentTransform * baseTransform * jointRotation;
-    }
+    Matrix4f jointRotation = Matrix4f::Identity();
+    jointRotation.block<3,3>(0,0) = jointRotMatrix;
+
+    // Combineer met huidige transformatie
+    currentTransform = currentTransform * baseTransform * jointRotation;
+
+    // Debug: print info per joint
+    // std::cout << "\nJoint[" << i << "] hoek = " << joint.getAngle() << "° (" << angleRad << " rad)\n";
+    // std::cout << "→ Axis: (" << axis.x() << ", " << axis.y() << ", " << axis.z() << ")\n";
+// 
+    // std::cout << "→ BaseTransform:\n" << baseTransform << "\n";
+    // std::cout << "→ JointRotation:\n" << jointRotation << "\n";
+    // std::cout << "→ Cumulatieve Transform:\n" << currentTransform << "\n";
+// 
+    // Vector3f trans = currentTransform.block<3,1>(0,3);
+    // std::cout << "→ Translatie tot nu toe: (" << trans.x() << ", " << trans.y() << ", " << trans.z() << ")\n";
+}
+
 
     // Extract de positie van de end-effector uit de matrix (laatste kolom)
     Vector3f endPos = currentTransform.block<3,1>(0,3);

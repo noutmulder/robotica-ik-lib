@@ -101,6 +101,29 @@ Vector3D RobotArm::getEndEffectorPosition()
     return Vector3D(endPos.x(), endPos.y(), endPos.z());
 }
 
+Vector3D RobotArm::getPartialEndEffectorPosition(int jointCount) {
+    Matrix4f currentTransform = Matrix4f::Identity();
+
+    for (int i = 0; i < jointCount && i < joints.size(); ++i) {
+        const Joint& joint = joints[i];
+
+        Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
+
+        float angleRad = joint.getAngle() * (M_PI / 180.0f);
+        Vector3f axis = joint.axis.toEigen().normalized();
+        Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
+
+        Matrix4f jointRotation = Matrix4f::Identity();
+        jointRotation.block<3,3>(0,0) = jointRotMatrix;
+
+        currentTransform = currentTransform * baseTransform * jointRotation;
+    }
+
+    Vector3f endPos = currentTransform.block<3,1>(0,3);
+    return Vector3D(endPos.x(), endPos.y(), endPos.z());
+}
+
+
 // Maakt een 4x4 transformatiematrix uit RPY (in radialen) + translatie
 Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation)
 {

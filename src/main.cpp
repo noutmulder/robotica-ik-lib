@@ -65,7 +65,8 @@ int main()
     } // Belangrijk: deze functie valideert én zet de hoeken
 
     // Bereken en print de end-effector positie
-    Vector3D endEffector = robotArm.getEndEffectorPosition();
+    // Vector3D endEffector = robotArm.getEndEffectorPosition();
+    Vector3D endEffector = robotArm.getPartialEndEffectorPosition(3);
     printEndEffectorPosition(endEffector, "End-effector positie");
 
     return 0;

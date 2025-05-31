@@ -31,8 +31,12 @@ public:
     // Draai een gewricht naar een specifieke hoek
     void rotateJoint(int jointIndex, float angle);
 
-    // Functie om de end-effector positie te krijgen
+    // Functie om de end-effector positie te krijgen (L6)
     Vector3D getEndEffectorPosition();
+
+    // Functie om de end-effector positie te krijgen (welke joint dan ook)
+    Vector3D getPartialEndEffectorPosition(int jointCount);
+
 };
 
 Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation);

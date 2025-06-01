@@ -44,7 +44,7 @@ int main()
     RobotArm robotArm;
 
     // 2. Doelpositie opgeven (bijv. binnen bereik van de arm)
-    Vector3D target(150.0f, 100.0f, 200.0f);  // X, Y, Z in meter
+    Vector3D target(0.150f, 0.100f, 0.200f);  // X, Y, Z in meter
     std::cout << "Target positie: ";
     target.printVector();
 

@@ -15,7 +15,7 @@ std::vector<float> IKSolver::solveIK(const Vector3D &target)
     solvePositionOnly(target, result);
 
     // Later: oriëntatie oplossen met joint 4–6 (bv. zodat grijper goed staat)
-    // solveOrientationOnly(target, result);
+    solveOrientationOnly(target, result);
 
     std::cout << "\nSamenvatting:\n";
     std::cout << "  Doelpositie:     " << target << "\n";
@@ -26,7 +26,7 @@ std::vector<float> IKSolver::solveIK(const Vector3D &target)
 
 void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &result)
 {
-    float delta = 5.0f; // stapgrootte in graden
+    float delta = 0.25f; // stapgrootte in graden
     int stagnantIterations = 0;
     float lastDistance = std::numeric_limits<float>::max();
 
@@ -52,9 +52,9 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
             break;
         }
 
-        if (stagnantIterations >= 100)
+        if (stagnantIterations >= 50 && delta > 0.01f)
         {
-            delta /= 2.0f;
+            delta = std::max(delta / 2.0f, 0.01f);
             std::cout << "Delta verlaagd naar " << delta << std::endl;
             stagnantIterations = 0;
         }
@@ -140,6 +140,9 @@ void IKSolver::solveOrientationOnly(const Vector3D &target, std::vector<float> &
 
 Vector3D IKSolver::getEndEffector(const std::vector<float> &jointAngles) const
 {
-    return arm->ik->getEndEffector(jointAngles);
+    for (int i = 0; i < 3; ++i)
+    {
+        arm->joints[i].setAngle(jointAngles[i]);
+    }
+    return arm->getPartialEndEffectorPosition(3);
 }
-

@@ -28,23 +28,6 @@ void InverseKinematics::rotateJoint(int index, float angle)
     }
 }
 
-Vector3D InverseKinematics::getEndEffector(const std::vector<float> &jointAngles) const
-{
-    float x = 0.0f, y = 0.0f, z = 0.0f;
-    float theta = 0.0f; // Accumulated rotation in radians
-
-    for (size_t i = 0; i < jointAngles.size(); ++i)
-    {
-        float angleRad = jointAngles[i] * (M_PI / 180.0f); // Degrees to radians
-        theta += angleRad;
-
-        float length = robotArm.joints[i].link->length;
-        x += length * cos(theta);
-        y += length * sin(theta);
-    }
-
-    return Vector3D(x, y, z);
-}
 
 void InverseKinematics::setJoints(const std::vector<Joint> &newJoints)
 {

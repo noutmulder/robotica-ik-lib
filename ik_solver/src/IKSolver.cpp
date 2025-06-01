@@ -30,6 +30,7 @@ std::vector<float> IKSolver::solveIK(const Vector3D &target, const Vector3D &des
 }
 
 
+
 void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &result)
 {
     float delta = 0.25f;

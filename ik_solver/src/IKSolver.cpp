@@ -7,33 +7,38 @@
 IKSolver::IKSolver(RobotArm *arm, float tolerance, int maxIterations)
     : arm(arm), tolerance(tolerance), maxIterations(maxIterations) {}
 
-std::vector<float> IKSolver::solveIK(const Vector3D &position, const Vector3D &desiredZ)
+std::vector<float> IKSolver::solveIK(const Vector3D &target, const Vector3D &desiredZ)
 {
-    std::vector<float> result(6, 0.0f); // [joint1, ..., joint6]
+    std::vector<float> result(6, 0.0f);
 
-    // Eerst positie oplossen met joint 1–3
-    solvePositionOnly(position, result);
+    // Eerst alleen de positie (joint 1–3)
+    solvePositionOnly(target, result);
 
-    // Oriëntatie oplossen met joint 4–6
+    Vector3D posJoints1to3 = arm->getPartialEndEffectorPosition(3);
+
+    // Daarna oriëntatie (joint 4–6)
     solveOrientationOnly(desiredZ, result);
 
+    Vector3D finalPos = arm->getEndEffectorPosition();
+
     std::cout << "\nSamenvatting:\n";
-    std::cout << "  Doelpositie:                  " << position << "\n";
-    std::cout << "  Bereikte positie (joints 1-3): " << getEndEffector(result) << "\n";
-    std::cout << "  Bereikte positie (volledig):   " << arm->getEndEffectorPosition() << "\n";
+    std::cout << "  Doelpositie:                  " << target << "\n";
+    std::cout << "  Bereikte positie (joints 1-3): " << posJoints1to3 << "\n";
+    std::cout << "  Bereikte positie (volledig):   " << finalPos << "\n";
 
     return result;
 }
 
+
 void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &result)
 {
-    float delta = 0.25f; // stapgrootte in graden
+    float delta = 0.25f;
     int stagnantIterations = 0;
     float lastDistance = std::numeric_limits<float>::max();
 
     for (int iter = 0; iter < maxIterations; ++iter)
     {
-        Vector3D current = arm->getPartialEndEffectorPosition(3);
+        Vector3D current = arm->getEndEffectorPosition(); // ✅ gebruik volledige end effector
         float distance = target.subtractVector(current).magnitude();
 
         if (std::abs(distance - lastDistance) > 1e-5)
@@ -56,7 +61,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
         if (stagnantIterations >= 50 && delta > 0.01f)
         {
             delta = std::max(delta / 2.0f, 0.01f);
-            std::cout << "Delta verlaagd naar " << delta << std::endl;
+            std::cout << "[IK] Delta verlaagd naar " << delta << std::endl;
             stagnantIterations = 0;
         }
 
@@ -64,58 +69,26 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
         {
             float originalAngle = arm->joints[i].getAngle();
 
-            // test +delta
-            float testAnglePlus = originalAngle + delta;
-            if (testAnglePlus >= arm->joints[i].getMinAngle() && testAnglePlus <= arm->joints[i].getMaxAngle())
-            {
-                arm->joints[i].setAngle(testAnglePlus);
-                float testDistPlus = target.subtractVector(arm->getPartialEndEffectorPosition(3)).magnitude();
+            float bestDistance = distance;
+            float bestAngle = originalAngle;
 
-                // test -delta
-                float testAngleMinus = originalAngle - delta;
-                float testDistMinus = std::numeric_limits<float>::max();
-                if (testAngleMinus >= arm->joints[i].getMinAngle() && testAngleMinus <= arm->joints[i].getMaxAngle())
-                {
-                    arm->joints[i].setAngle(testAngleMinus);
-                    testDistMinus = target.subtractVector(arm->getPartialEndEffectorPosition(3)).magnitude();
-                }
-
-                // kies de beste richting
-                if (testDistPlus < testDistMinus && testDistPlus < distance)
-                {
-                    arm->joints[i].setAngle(testAnglePlus);
-                }
-                else if (testDistMinus < distance)
-                {
-                    arm->joints[i].setAngle(testAngleMinus);
-                }
-                else
-                {
-                    arm->joints[i].setAngle(originalAngle);
-                }
-            }
-            else
+            for (float dir : {+delta, -delta})
             {
-                // test -delta alleen als +delta ongeldig is
-                float testAngleMinus = originalAngle - delta;
-                if (testAngleMinus >= arm->joints[i].getMinAngle() && testAngleMinus <= arm->joints[i].getMaxAngle())
+                float testAngle = originalAngle + dir;
+                if (testAngle >= arm->joints[i].getMinAngle() && testAngle <= arm->joints[i].getMaxAngle())
                 {
-                    arm->joints[i].setAngle(testAngleMinus);
-                    float testDistMinus = target.subtractVector(arm->getPartialEndEffectorPosition(3)).magnitude();
-                    if (testDistMinus < distance)
+                    arm->joints[i].setAngle(testAngle);
+                    float testDist = target.subtractVector(arm->getEndEffectorPosition()).magnitude();
+
+                    if (testDist < bestDistance)
                     {
-                        arm->joints[i].setAngle(testAngleMinus);
-                    }
-                    else
-                    {
-                        arm->joints[i].setAngle(originalAngle);
+                        bestDistance = testDist;
+                        bestAngle = testAngle;
                     }
                 }
-                else
-                {
-                    arm->joints[i].setAngle(originalAngle); // geen geldige beweging mogelijk
-                }
             }
+
+            arm->joints[i].setAngle(bestAngle); // toepassen beste richting
         }
     }
 
@@ -205,9 +178,11 @@ void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float>
 
 Vector3D IKSolver::getEndEffector(const std::vector<float> &jointAngles) const
 {
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < jointAngles.size(); ++i)
     {
         arm->joints[i].setAngle(jointAngles[i]);
     }
-    return arm->getPartialEndEffectorPosition(3);
+
+    return arm->getEndEffectorPosition();
 }
+

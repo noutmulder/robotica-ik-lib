@@ -6,9 +6,9 @@
 InverseKinematics::InverseKinematics(RobotArm &arm, IKSolver *solver)
     : robotArm(arm), ikSolver(solver) {}
 
-void InverseKinematics::moveTo(const Vector3D &target)
+void InverseKinematics::moveTo(const Vector3D &target, const Vector3D &desiredZ)
 {
-    std::vector<float> angles = ikSolver->solveIK(target); // Roep de solveIK functie aan van de solver
+    std::vector<float> angles = ikSolver->solveIK(target, desiredZ);
 
     for (size_t i = 0; i < robotArm.joints.size(); ++i)
     {

@@ -45,11 +45,12 @@ int main()
 
     // 2. Doelpositie opgeven (bijv. binnen bereik van de arm)
     Vector3D target(0.150f, 0.100f, 0.200f);  // X, Y, Z in meter
+    Vector3D desiredZ(0, 0, 1);  // Geef aan welke orientatie de end effector moet hebben
     std::cout << "Target positie: ";
     target.printVector();
 
     // 3. Roep inverse kinematica aan
-    robotArm.moveTo(target);  // Deze roept solveIK → solvePositionOnly()
+    robotArm.moveTo(target, desiredZ);  // Deze roept solveIK → solvePositionOnly()
 
     // 4. Haal de nieuwe joint-hoeken op (geclampte waarden)
     std::vector<float> finalAngles;

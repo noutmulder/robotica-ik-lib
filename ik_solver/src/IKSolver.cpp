@@ -7,19 +7,20 @@
 IKSolver::IKSolver(RobotArm *arm, float tolerance, int maxIterations)
     : arm(arm), tolerance(tolerance), maxIterations(maxIterations) {}
 
-std::vector<float> IKSolver::solveIK(const Vector3D &target)
+std::vector<float> IKSolver::solveIK(const Vector3D &position, const Vector3D &desiredZ)
 {
     std::vector<float> result(6, 0.0f); // [joint1, ..., joint6]
 
     // Eerst positie oplossen met joint 1–3
-    solvePositionOnly(target, result);
+    solvePositionOnly(position, result);
 
-    // Later: oriëntatie oplossen met joint 4–6 (bv. zodat grijper goed staat)
-    solveOrientationOnly(target, result);
+    // Oriëntatie oplossen met joint 4–6
+    solveOrientationOnly(desiredZ, result);
 
     std::cout << "\nSamenvatting:\n";
-    std::cout << "  Doelpositie:     " << target << "\n";
-    std::cout << "  Bereikte positie: " << getEndEffector(result) << "\n";
+    std::cout << "  Doelpositie:                  " << position << "\n";
+    std::cout << "  Bereikte positie (joints 1-3): " << getEndEffector(result) << "\n";
+    std::cout << "  Bereikte positie (volledig):   " << arm->getEndEffectorPosition() << "\n";
 
     return result;
 }
@@ -126,16 +127,80 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
     }
 }
 
-void IKSolver::solveOrientationOnly(const Vector3D &target, std::vector<float> &result)
+void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float> &result)
 {
-    // TODO: implementeer oriëntatie-oplossing voor joint 4–6
+    float delta = 1.0f;
+    int stagnant = 0;
+    float bestDot = -1.0f;
+    float lastDelta = delta;
 
-    // Voor nu: laat deze joints op 0 staan
-    result[3] = 0.0f;
-    result[4] = 0.0f;
-    result[5] = 0.0f;
+    for (int iter = 0; iter < maxIterations; ++iter)
+    {
+        // Bereken huidige Z-as van end-effector
+        Eigen::Matrix4f tf = arm->getEndEffectorTransform();
+        Eigen::Vector3f currentZ = tf.block<3, 1>(0, 2);
+        float alignment = desiredZ.toEigen().normalized().dot(currentZ.normalized());
 
-    std::cout << "[solveOrientationOnly] Joint 4-6 op 0° gelaten (nog niet geïmplementeerd)\n";
+        if (alignment > bestDot + 1e-4f)
+        {
+            std::cout << "[Orientation Iter " << iter << "] dot(Z, desired): " << alignment << "\n";
+            bestDot = alignment;
+            stagnant = 0;
+        }
+        else
+        {
+            stagnant++;
+        }
+
+        if (alignment > 0.999f)
+        {
+            std::cout << "[Orientation] Doel georiënteerd. Alignment: " << alignment << "\n";
+            break;
+        }
+
+        // Verlaag delta als we te lang stilstaan
+        if (stagnant > 50 && delta > 0.01f)
+        {
+            delta = std::max(delta * 0.5f, 0.01f);
+            if (delta != lastDelta)
+            {
+                std::cout << "[Orientation] Delta verlaagd naar " << delta << "\n";
+                lastDelta = delta;
+            }
+            stagnant = 0;
+        }
+
+        // Test voor joints 4–6
+        for (int i = 3; i < 6; ++i)
+        {
+            float original = arm->joints[i].getAngle();
+            float bestLocalDot = bestDot;
+            float chosenAngle = original;
+
+            for (float direction : {+delta, -delta})
+            {
+                float testAngle = original + direction;
+                if (testAngle < arm->joints[i].getMinAngle() || testAngle > arm->joints[i].getMaxAngle())
+                    continue;
+
+                arm->joints[i].setAngle(testAngle);
+                Eigen::Vector3f zTest = arm->getEndEffectorTransform().block<3, 1>(0, 2);
+                float dot = desiredZ.toEigen().normalized().dot(zTest.normalized());
+
+                if (dot > bestLocalDot)
+                {
+                    bestLocalDot = dot;
+                    chosenAngle = testAngle;
+                }
+            }
+
+            arm->joints[i].setAngle(chosenAngle); // best gevonden
+        }
+    }
+
+    // Result opslaan voor joints 4-6
+    for (int i = 3; i < 6; ++i)
+        result[i] = arm->joints[i].getAngle();
 }
 
 Vector3D IKSolver::getEndEffector(const std::vector<float> &jointAngles) const

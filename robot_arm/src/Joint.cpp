@@ -50,3 +50,15 @@ float Joint::getAngle() const
 {
     return angle;
 }
+
+// Vanzelfsprekend
+float Joint::getMinAngle() const
+{
+    return minAngle;
+}
+
+float Joint::getMaxAngle() const
+{
+    return maxAngle;
+}
+

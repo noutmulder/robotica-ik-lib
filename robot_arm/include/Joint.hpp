@@ -31,6 +31,9 @@ public:
     void setAngle(float newAngle);
 
     float getAngle() const;
+
+    float getMinAngle() const;
+    float getMaxAngle() const;
 };
 
 #endif

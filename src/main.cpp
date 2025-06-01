@@ -15,7 +15,7 @@ void printEndEffectorPosition(const Vector3D &position, const std::string &label
               << position.z << ")\n";
 }
 
-// zet de waardens om naar radialen, en schrijft naar bestand.
+// Zet de waardes om naar radialen, en schrijft naar bestand.
 void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::string &filename)
 {
     std::ofstream outfile(filename);
@@ -25,7 +25,6 @@ void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::stri
         return;
     }
 
-    // Zet elke hoek om van graden naar radialen en schrijf naar bestand
     for (size_t i = 0; i < jointAnglesInDegrees.size(); ++i)
     {
         float radians = jointAnglesInDegrees[i] * (M_PI / 180.0f);
@@ -34,40 +33,38 @@ void writeToFile(const std::vector<float> &jointAnglesInDegrees, const std::stri
             outfile << ",";
     }
     outfile << std::endl;
-
     outfile.close();
 }
 
 int main()
 {
-    std::cout << "Running writing test...\n";
+    std::cout << "Running IK test...\n";
 
-    // Maak een RobotArm object aan
+    // 1. Maak de RobotArm aan
     RobotArm robotArm;
 
-    // Definieer de hoeken voor alle joints (allemaal 0.0)
-    std::vector<float> fixedJointAngles = {-30.0f, -30.0f, -30.0f, -30.0f, -30.0f, -30.0f};
-    // std::vector<float> fixedJointAngles = {90.0f, 0.0f, -0.0f, 0.0f, 0.0f, 0.0f};
+    // 2. Doelpositie opgeven (bijv. binnen bereik van de arm)
+    Vector3D target(150.0f, 100.0f, 200.0f);  // X, Y, Z in meter
+    std::cout << "Target positie: ";
+    target.printVector();
 
-    // Zet deze hoeken in de robotarm
-    if (robotArm.ik->setJointAngles(fixedJointAngles))
+    // 3. Roep inverse kinematica aan
+    robotArm.moveTo(target);  // Deze roept solveIK → solvePositionOnly()
+
+    // 4. Haal de nieuwe joint-hoeken op (geclampte waarden)
+    std::vector<float> finalAngles;
+    for (const Joint &joint : robotArm.joints)
     {
-        std::string filename = "/home/nout/ros2_ws/joints.txt";
+        finalAngles.push_back(joint.getAngle());
+    }
 
-        // Haal de actuele hoeken op uit de robot
-        std::vector<float> clampedAngles; // clamped betekend dat de hoeken binnen de limieten zijn
-        for (const Joint &joint : robotArm.joints)
-        {
-            clampedAngles.push_back(joint.getAngle());
-        }
+    // 5. Schrijf ze weg naar bestand (in radialen)
+    std::string filename = "/home/nout/ros2_ws/joints.txt";
+    writeToFile(finalAngles, filename);
 
-        writeToFile(clampedAngles, filename);
-    } // Belangrijk: deze functie valideert én zet de hoeken
-
-    // Bereken en print de end-effector positie
-    // Vector3D endEffector = robotArm.getEndEffectorPosition();
-    Vector3D endEffector = robotArm.getPartialEndEffectorPosition(3);
-    printEndEffectorPosition(endEffector, "End-effector positie");
+    // 6. Print de daadwerkelijke bereikte positie (via FK)
+    Vector3D reached = robotArm.getPartialEndEffectorPosition(3);
+    // printEndEffectorPosition(reached, "Bereikte positie");
 
     return 0;
 }

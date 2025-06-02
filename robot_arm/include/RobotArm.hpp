@@ -26,13 +26,17 @@ public:
     RobotArm();
 
     // Beweeg de arm naar een doelpositie
-    void moveTo(Vector3D target);
+    void moveTo(const Vector3D &target, const Vector3D &desiredZ);
 
     // Draai een gewricht naar een specifieke hoek
     void rotateJoint(int jointIndex, float angle);
 
-    // Functie om de end-effector positie te krijgen
+    // Functie om de end-effector positie te krijgen (L6)
     Vector3D getEndEffectorPosition();
+
+    // Functie om de end-effector positie te krijgen (welke joint dan ook)
+    Vector3D getPartialEndEffectorPosition(int jointCount);
+    Eigen::Matrix4f getEndEffectorTransform();
 };
 
 Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation);

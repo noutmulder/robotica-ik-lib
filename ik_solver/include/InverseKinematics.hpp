@@ -20,13 +20,10 @@ public:
     InverseKinematics(RobotArm &arm, IKSolver *solver);
 
     // Moves the end effector to a target position
-    void moveTo(const Vector3D &target);
+    void moveTo(const Vector3D &target, const Vector3D &desiredZ);
 
     // Rotates a specific joint by a given angle
     void rotateJoint(int index, float angle);
-
-    // Gets the current position of the end effector
-    Vector3D getEndEffector(const std::vector<float> &jointAngles) const;
 
     // Sets the joints to the specified positions
     void setJoints(const std::vector<Joint> &newJoints);

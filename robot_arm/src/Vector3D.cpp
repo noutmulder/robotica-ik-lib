@@ -34,25 +34,25 @@ float Vector3D::distanceTo(Vector3D toVector) const
 }
 
 // subtract vector from vector
-Vector3D Vector3D::addVector(const Vector3D &secondVector)
+Vector3D Vector3D::addVector(const Vector3D &secondVector) const
 {
     return Vector3D(x + secondVector.x, y + secondVector.y, z + secondVector.z);
 }
 
 // add vector to vector
-Vector3D Vector3D::subtractVector(const Vector3D &secondVector)
+Vector3D Vector3D::subtractVector(const Vector3D &secondVector) const
 {
     return Vector3D(x - secondVector.x, y - secondVector.y, z - secondVector.z);
 }
 
 // print a vector for debugging
-void Vector3D::printVector()
+void Vector3D::printVector() const
 {
     std::cout << "(" << x << ", " << y << ", " << z << ")" << std::endl;
 }
 
 // scales a vector
-Vector3D Vector3D::scaleVector(float factor)
+Vector3D Vector3D::scaleVector(float factor) const
 {
     return Vector3D(x * factor, y * factor, z * factor);
 }
@@ -88,3 +88,11 @@ Vector3D Vector3D::fromEigen(const Eigen::Vector3f &vec)
 {
     return Vector3D(vec.x(), vec.y(), vec.z());
 }
+
+std::ostream &operator<<(std::ostream &os, const Vector3D &v)
+{
+    os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+    return os;
+}
+
+

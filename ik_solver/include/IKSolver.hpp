@@ -7,7 +7,7 @@
 class RobotArm;
 
 #define MAX_ITERATIONS 1000
-#define TOLERANCE 0.01
+#define TOLERANCE 0.001f // in meters = 1mm
 
 class IKSolver
 {
@@ -17,8 +17,20 @@ public:
     RobotArm *arm;     // Verwijzing naar de robotarm
 
     IKSolver(RobotArm *arm, float tolerance = TOLERANCE, int maxIterations = MAX_ITERATIONS);
-    std::vector<float> solveIK(const Vector3D &target);
+    // Geef positie mee en gewilde orientatie van de z-as van de end effector 
+    std::vector<float> solveIK(const Vector3D &target, const Vector3D &desiredZ);
+
+
+    
+    // Los alleen de positie op (joints 1–3)
+    void solvePositionOnly(const Vector3D &target, std::vector<float> &result);
+
+    // Los alleen de oriëntatie op (joints 4–6)
+    void solveOrientationOnly(const Vector3D &desiredZ, std::vector<float> &result);
+    // void solveOrientationOnly(const Vector3D &target, std::vector<float> &result);
+
     Vector3D getEndEffector(const std::vector<float> &jointAngles) const;
+
 };
 
 #endif // IKSOLVER_HPP

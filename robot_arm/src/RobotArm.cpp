@@ -42,10 +42,10 @@ RobotArm::RobotArm()
 }
 
 // Beweeg de arm naar een doelpositie
-void RobotArm::moveTo(Vector3D target)
+void RobotArm::moveTo(const Vector3D &target, const Vector3D &desiredZ)
 {
     // Gebruik de inverse kinematica solver om de hoeken voor de gewrichten te berekenen
-    std::vector<float> angles = ikSolver->solveIK(target);
+    std::vector<float> angles = ikSolver->solveIK(target, desiredZ);
 
     // Pas de hoeken van de gewrichten aan
     for (size_t i = 0; i < angles.size(); ++i)
@@ -56,6 +56,7 @@ void RobotArm::moveTo(Vector3D target)
     // Zet de gewrichten in de inverse kinematica manager
     ik->setJoints(joints);
 }
+
 
 // Draai een gewricht naar een specifieke hoek
 void RobotArm::rotateJoint(int jointIndex, float angle)
@@ -101,6 +102,30 @@ Vector3D RobotArm::getEndEffectorPosition()
     return Vector3D(endPos.x(), endPos.y(), endPos.z());
 }
 
+Vector3D RobotArm::getPartialEndEffectorPosition(int jointCount)
+{
+    Matrix4f currentTransform = Matrix4f::Identity();
+
+    for (size_t i = 0; i < static_cast<size_t>(jointCount) && i < joints.size(); ++i)
+    {
+        const Joint &joint = joints[i];
+
+        Matrix4f baseTransform = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
+
+        float angleRad = joint.getAngle() * (M_PI / 180.0f);
+        Vector3f axis = joint.axis.toEigen().normalized();
+        Matrix3f jointRotMatrix = AngleAxisf(angleRad, axis).toRotationMatrix();
+
+        Matrix4f jointRotation = Matrix4f::Identity();
+        jointRotation.block<3, 3>(0, 0) = jointRotMatrix;
+
+        currentTransform = currentTransform * baseTransform * jointRotation;
+    }
+
+    Vector3f endPos = currentTransform.block<3, 1>(0, 3);
+    return Vector3D(endPos.x(), endPos.y(), endPos.z());
+}
+
 // Maakt een 4x4 transformatiematrix uit RPY (in radialen) + translatie
 Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3D &translation)
 {
@@ -117,3 +142,22 @@ Matrix4f createTransformFromRPYAndTranslation(const Vector3D &rpy, const Vector3
 
     return transform;
 }
+
+Eigen::Matrix4f RobotArm::getEndEffectorTransform()
+{
+    Matrix4f transform = Matrix4f::Identity();
+    for (const Joint &joint : joints)
+    {
+        Matrix4f base = createTransformFromRPYAndTranslation(joint.rpy, joint.origin);
+
+        float rad = joint.getAngle() * M_PI / 180.0f;
+        Matrix3f rot = AngleAxisf(rad, joint.axis.toEigen()).toRotationMatrix();
+
+        Matrix4f jointRot = Matrix4f::Identity();
+        jointRot.block<3,3>(0,0) = rot;
+
+        transform = transform * base * jointRot;
+    }
+    return transform;
+}
+

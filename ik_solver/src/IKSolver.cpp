@@ -4,20 +4,22 @@
 #include "IKLogging.hpp"
 #include "../../robot_arm/include/RobotArm.hpp"
 
+// Constructor: slaat robotarm + instellingen op
 IKSolver::IKSolver(RobotArm *arm, float tolerance, int maxIterations)
     : arm(arm), tolerance(tolerance), maxIterations(maxIterations) {}
 
+// Hoofdfunctie voor inverse kinematica
+// 1. Los positie op met joints 1–3
+// 2. Pas daarna de oriëntatie aan met joints 4–6
 std::vector<float> IKSolver::solveIK(const Vector3D &target, const Eigen::Matrix3f &R_des)
 {
     std::vector<float> result(6, 0.0f);
 
-    // Eerst alleen de positie (joint 1–3)
-    solvePositionOnly(target, result);
+    solvePositionOnly(target, result); // eerst positie
 
     Vector3D posJoints1to3 = arm->getPartialEndEffectorPosition(3);
 
-    // Daarna oriëntatie (joint 4–6)
-    solveOrientationOnly(R_des, result);
+    solveOrientationOnly(R_des, result); // dan oriëntatie
 
     Vector3D finalPos = arm->getEndEffectorPosition();
 
@@ -31,6 +33,7 @@ std::vector<float> IKSolver::solveIK(const Vector3D &target, const Eigen::Matrix
     return result;
 }
 
+// Optimaliseert alleen de positie van de end-effector (joints 1–3)
 void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &result)
 {
     float delta = 0.25f;
@@ -47,6 +50,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
             std::cout << "[Iter " << iter << "] afstand tot doel: " << distance << "\n";
 #endif
 
+        // Als de afstand niet verbetert, tel dat bij stagnant op
         if (std::abs(distance - lastDistance) > 1e-5)
         {
             lastDistance = distance;
@@ -57,6 +61,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
             stagnantIterations++;
         }
 
+        // Stop als we binnen de tolerantie zitten
         if (distance < tolerance)
         {
 #if IK_LOG_POSITION
@@ -65,6 +70,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
             break;
         }
 
+        // Verlaag stapgrootte als er te lang geen verbetering is
         if (stagnantIterations >= 50 && delta > 0.01f)
         {
             delta = std::max(delta / 2.0f, 0.01f);
@@ -74,6 +80,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
             stagnantIterations = 0;
         }
 
+        // Zoek per joint (1–3) de beste richting om afstand te verkleinen
         for (int i = 0; i < 3; ++i)
         {
             float originalAngle = arm->joints[i].getAngle();
@@ -100,6 +107,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
         }
     }
 
+    // Zet resultaat (alleen joints 1–3)
     result.clear();
     for (int i = 0; i < 3; ++i)
     {
@@ -107,6 +115,7 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
     }
 }
 
+// Optimaliseert de volledige oriëntatie van de end-effector (joints 4–6)
 void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<float> &result)
 {
     float delta = 1.0f;
@@ -116,7 +125,7 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
 
     for (int iter = 0; iter < maxIterations; ++iter)
     {
-        // Huidige rotatie van de end-effector (4x4 matrix)
+        // Huidige oriëntatie van de end-effector
         Eigen::Matrix4f tf = arm->getEndEffectorTransform();
         Eigen::Vector3f x_current = tf.block<3, 1>(0, 0);
         Eigen::Vector3f y_current = tf.block<3, 1>(0, 1);
@@ -127,7 +136,7 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
         Eigen::Vector3f y_target = R_des.block<3, 1>(0, 1);
         Eigen::Vector3f z_target = R_des.block<3, 1>(0, 2);
 
-        // Dotproducts als uitlijnscore (hoe goed elk asje overeenkomt)
+        // Bepaal hoe goed alle assen uitgelijnd zijn (dotproduct)
         float score =
             x_current.normalized().dot(x_target.normalized()) +
             y_current.normalized().dot(y_target.normalized()) +
@@ -138,6 +147,7 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
             std::cout << "[Iter " << iter << "] alignment score: " << score << "\n";
 #endif
 
+        // Reset stagnatie als er verbetering is
         if (score > bestScore + 1e-4f)
         {
             bestScore = score;
@@ -148,7 +158,8 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
             stagnant++;
         }
 
-        if (score > 2.99f) // 3 perfecte dotproducts = maximale score = 3
+        // Stop als maximale score bereikt is
+        if (score > 2.99f)
         {
 #if IK_LOG_ORIENTATION
             std::cout << "[Orientation] Volledige oriëntatie bereikt. Score: " << score << "\n";
@@ -156,6 +167,7 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
             break;
         }
 
+        // Verminder stapgrootte als we vastzitten
         if (stagnant > 50 && delta > 0.01f)
         {
             delta = std::max(delta * 0.5f, 0.01f);
@@ -169,7 +181,7 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
             stagnant = 0;
         }
 
-        // Probeer voor elke joint 4–6 een kleine stap
+        // Test elke joint (4–6) met kleine rotaties
         for (int i = 3; i < 6; ++i)
         {
             float original = arm->joints[i].getAngle();
@@ -220,11 +232,12 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
     std::cout << "  Hoek     = " << aa.angle() * (180.0 / M_PI) << " graden\n";
 #endif
 
-    // Zet de eindresultaten terug in de vector
+    // Zet de eindwaarden voor joints 4–6 terug in result
     for (int i = 3; i < 6; ++i)
         result[i] = arm->joints[i].getAngle();
 }
 
+// Berekent de eindpositie van de grijper na het instellen van alle hoeken
 Vector3D IKSolver::getEndEffector(const std::vector<float> &jointAngles) const
 {
     for (size_t i = 0; i < jointAngles.size(); ++i)

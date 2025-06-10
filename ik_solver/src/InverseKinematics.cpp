@@ -2,21 +2,24 @@
 #include <iostream>
 #include "IKSolver.hpp"
 
-// Constructor om de arm met de RobotArm en IK solver te initialiseren
+// Constructor: koppelt de inverse kinematica aan de robotarm en de solver
 InverseKinematics::InverseKinematics(RobotArm &arm, IKSolver *solver)
     : robotArm(arm), ikSolver(solver) {}
 
+// Beweeg de grijper naar een gewenste positie én oriëntatie
 void InverseKinematics::moveTo(const Vector3D &target, const Eigen::Matrix3f &R_des)
 {
+    // Vraag inverse kinematica oplossing op
     std::vector<float> angles = ikSolver->solveIK(target, R_des);
 
+    // Zet de berekende hoeken in de robotarm
     for (size_t i = 0; i < robotArm.joints.size(); ++i)
     {
         robotArm.joints[i].setAngle(angles[i]);
     }
 }
 
-
+// Roteer één gewricht naar een specifieke hoek (in graden)
 void InverseKinematics::rotateJoint(int index, float angle)
 {
     if (index >= 0 && index < robotArm.joints.size())
@@ -29,12 +32,13 @@ void InverseKinematics::rotateJoint(int index, float angle)
     }
 }
 
-
+// Zet alle gewrichten in één keer (bijv. vanuit andere armstructuur)
 void InverseKinematics::setJoints(const std::vector<Joint> &newJoints)
 {
     robotArm.joints = newJoints;
 }
 
+// Zet gewrichtshoeken met grenscontrole (clamping binnen min/max)
 bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
 {
     size_t n = std::min(angles.size(), robotArm.joints.size());
@@ -45,6 +49,7 @@ bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
         float maxAngle = robotArm.joints[i].maxAngle;
         float target = angles[i];
 
+        // Clamp naar toegestane grenzen
         if (target < minAngle)
         {
             std::cout << "Joint[" << i << "] below minimum! (" << target << "° → " << minAngle << "°)\n";
@@ -56,6 +61,7 @@ bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
             target = maxAngle;
         }
 
+        // Alleen aanpassen als de hoek echt verandert
         float before = robotArm.joints[i].getAngle();
         robotArm.joints[i].setAngle(target);
         float after = robotArm.joints[i].getAngle();
@@ -73,6 +79,7 @@ bool InverseKinematics::setJointAngles(const std::vector<float> &angles)
     return true;
 }
 
+// Haal de huidige hoeken van alle gewrichten op
 std::vector<float> InverseKinematics::getJointAngles() const
 {
     std::vector<float> angles;

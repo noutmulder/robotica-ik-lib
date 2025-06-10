@@ -26,7 +26,7 @@ public:
     RobotArm();
 
     // Beweeg de arm naar een doelpositie
-    void moveTo(const Vector3D &target, const Vector3D &desiredZ);
+    void moveTo(const Vector3D &target, const Eigen::Matrix3f &R_des);
 
     // Draai een gewricht naar een specifieke hoek
     void rotateJoint(int jointIndex, float angle);

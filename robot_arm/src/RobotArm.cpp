@@ -42,11 +42,11 @@ RobotArm::RobotArm()
 }
 
 // Beweeg de arm naar een doelpositie
-void RobotArm::moveTo(const Vector3D &target, const Vector3D &desiredZ)
+void RobotArm::moveTo(const Vector3D &target, const Eigen::Matrix3f &R_des)
 {
     // Gebruik de inverse kinematica solver om de hoeken voor de gewrichten te berekenen
-    std::vector<float> angles = ikSolver->solveIK(target, desiredZ);
-
+    std::vector<float> angles = ikSolver->solveIK(target, R_des);
+    
     // Pas de hoeken van de gewrichten aan
     for (size_t i = 0; i < angles.size(); ++i)
     {

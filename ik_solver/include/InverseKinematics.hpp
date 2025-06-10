@@ -20,7 +20,7 @@ public:
     InverseKinematics(RobotArm &arm, IKSolver *solver);
 
     // Moves the end effector to a target position
-    void moveTo(const Vector3D &target, const Vector3D &desiredZ);
+    void moveTo(const Vector3D &target, const Eigen::Matrix3f &R_des);
 
     // Rotates a specific joint by a given angle
     void rotateJoint(int index, float angle);

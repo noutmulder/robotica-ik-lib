@@ -44,14 +44,19 @@ int main()
     RobotArm robotArm;
 
     // 2. Doelpositie opgeven (bijv. binnen bereik van de arm)
-    Vector3D target(0.150f, -0.100f, 0.050f);  // X, Y, Z in meter
-    Vector3D desiredZ(0, 0, 1);  // Geef aan welke orientatie de end effector moet hebben.
+    Vector3D target(0.250f, -0.00f, 0.00f);
+    Eigen::Matrix3f R;
+
+    // Stel gewenste oriëntatie in (Z wijst omlaag, X en Y zoals normaal)
+    R.col(0) = Eigen::Vector3f(0, 0, 0);  // X-as
+    R.col(1) = Eigen::Vector3f(1, 0, 0);  // Y-as naar 
+    R.col(2) = Eigen::Vector3f(0, 0, 1);  // Z-as omlaag
 
     std::cout << "Target positie: ";
     target.printVector();
 
     // 3. Roep inverse kinematica aan
-    robotArm.moveTo(target, desiredZ);  // Deze roept solveIK → solvePositionOnly()
+    robotArm.moveTo(target, R); // Deze roept solveIK → solvePositionOnly()
 
     // 4. Haal de nieuwe joint-hoeken op (geclampte waarden)
     std::vector<float> finalAngles;

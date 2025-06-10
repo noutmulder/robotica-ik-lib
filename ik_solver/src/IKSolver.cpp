@@ -7,7 +7,7 @@
 IKSolver::IKSolver(RobotArm *arm, float tolerance, int maxIterations)
     : arm(arm), tolerance(tolerance), maxIterations(maxIterations) {}
 
-std::vector<float> IKSolver::solveIK(const Vector3D &target, const Vector3D &desiredZ)
+std::vector<float> IKSolver::solveIK(const Vector3D &target, const Eigen::Matrix3f &R_des)
 {
     std::vector<float> result(6, 0.0f);
 
@@ -17,7 +17,7 @@ std::vector<float> IKSolver::solveIK(const Vector3D &target, const Vector3D &des
     Vector3D posJoints1to3 = arm->getPartialEndEffectorPosition(3);
 
     // Daarna oriëntatie (joint 4–6)
-    solveOrientationOnly(desiredZ, result);
+    solveOrientationOnly(R_des, result);
 
     Vector3D finalPos = arm->getEndEffectorPosition();
 
@@ -107,27 +107,40 @@ void IKSolver::solvePositionOnly(const Vector3D &target, std::vector<float> &res
     }
 }
 
-void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float> &result)
+void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<float> &result)
 {
     float delta = 1.0f;
     int stagnant = 0;
-    float bestDot = -1.0f;
+    float bestScore = -100.0f;
     float lastDelta = delta;
 
     for (int iter = 0; iter < maxIterations; ++iter)
     {
+        // Huidige rotatie van de end-effector (4x4 matrix)
         Eigen::Matrix4f tf = arm->getEndEffectorTransform();
-        Eigen::Vector3f currentZ = tf.block<3, 1>(0, 2);
-        float alignment = desiredZ.toEigen().normalized().dot(currentZ.normalized());
+        Eigen::Vector3f x_current = tf.block<3, 1>(0, 0);
+        Eigen::Vector3f y_current = tf.block<3, 1>(0, 1);
+        Eigen::Vector3f z_current = tf.block<3, 1>(0, 2);
+
+        // Gewenste assen (uit R_des matrix)
+        Eigen::Vector3f x_target = R_des.block<3, 1>(0, 0);
+        Eigen::Vector3f y_target = R_des.block<3, 1>(0, 1);
+        Eigen::Vector3f z_target = R_des.block<3, 1>(0, 2);
+
+        // Dotproducts als uitlijnscore (hoe goed elk asje overeenkomt)
+        float score =
+            x_current.normalized().dot(x_target.normalized()) +
+            y_current.normalized().dot(y_target.normalized()) +
+            z_current.normalized().dot(z_target.normalized());
 
 #if IK_LOG_ORIENTATION
-        if (alignment > bestDot + 1e-4f)
-            std::cout << "[Orientation Iter " << iter << "] dot(Z, desired): " << alignment << "\n";
+        if (score > bestScore + 1e-4f)
+            std::cout << "[Iter " << iter << "] alignment score: " << score << "\n";
 #endif
 
-        if (alignment > bestDot + 1e-4f)
+        if (score > bestScore + 1e-4f)
         {
-            bestDot = alignment;
+            bestScore = score;
             stagnant = 0;
         }
         else
@@ -135,10 +148,10 @@ void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float>
             stagnant++;
         }
 
-        if (alignment > 0.999f)
+        if (score > 2.99f) // 3 perfecte dotproducts = maximale score = 3
         {
 #if IK_LOG_ORIENTATION
-            std::cout << "[Orientation] Doel georiënteerd. Alignment: " << alignment << "\n";
+            std::cout << "[Orientation] Volledige oriëntatie bereikt. Score: " << score << "\n";
 #endif
             break;
         }
@@ -156,10 +169,11 @@ void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float>
             stagnant = 0;
         }
 
+        // Probeer voor elke joint 4–6 een kleine stap
         for (int i = 3; i < 6; ++i)
         {
             float original = arm->joints[i].getAngle();
-            float bestLocalDot = bestDot;
+            float bestLocalScore = bestScore;
             float chosenAngle = original;
 
             for (float direction : {+delta, -delta})
@@ -169,12 +183,20 @@ void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float>
                     continue;
 
                 arm->joints[i].setAngle(testAngle);
-                Eigen::Vector3f zTest = arm->getEndEffectorTransform().block<3, 1>(0, 2);
-                float dot = desiredZ.toEigen().normalized().dot(zTest.normalized());
 
-                if (dot > bestLocalDot)
+                Eigen::Matrix4f tfTest = arm->getEndEffectorTransform();
+                Eigen::Vector3f xTest = tfTest.block<3, 1>(0, 0);
+                Eigen::Vector3f yTest = tfTest.block<3, 1>(0, 1);
+                Eigen::Vector3f zTest = tfTest.block<3, 1>(0, 2);
+
+                float testScore =
+                    xTest.normalized().dot(x_target.normalized()) +
+                    yTest.normalized().dot(y_target.normalized()) +
+                    zTest.normalized().dot(z_target.normalized());
+
+                if (testScore > bestLocalScore)
                 {
-                    bestLocalDot = dot;
+                    bestLocalScore = testScore;
                     chosenAngle = testAngle;
                 }
             }
@@ -183,6 +205,7 @@ void IKSolver::solveOrientationOnly(const Vector3D &desiredZ, std::vector<float>
         }
     }
 
+    // Zet de eindresultaten terug in de vector
     for (int i = 3; i < 6; ++i)
         result[i] = arm->joints[i].getAngle();
 }

@@ -6,15 +6,16 @@
 InverseKinematics::InverseKinematics(RobotArm &arm, IKSolver *solver)
     : robotArm(arm), ikSolver(solver) {}
 
-void InverseKinematics::moveTo(const Vector3D &target, const Vector3D &desiredZ)
+void InverseKinematics::moveTo(const Vector3D &target, const Eigen::Matrix3f &R_des)
 {
-    std::vector<float> angles = ikSolver->solveIK(target, desiredZ);
+    std::vector<float> angles = ikSolver->solveIK(target, R_des);
 
     for (size_t i = 0; i < robotArm.joints.size(); ++i)
     {
         robotArm.joints[i].setAngle(angles[i]);
     }
 }
+
 
 void InverseKinematics::rotateJoint(int index, float angle)
 {

@@ -44,12 +44,12 @@ int main()
     RobotArm robotArm;
 
     // 2. Doelpositie opgeven (bijv. binnen bereik van de arm)
-    Vector3D target(0.250f, -0.00f, 0.00f);
+    Vector3D target(0.150f, 0.150f, 0.050f);
     Eigen::Matrix3f R;
 
     // Stel gewenste oriëntatie in (Z wijst omlaag, X en Y zoals normaal)
     R.col(0) = Eigen::Vector3f(0, 0, 0);  // X-as
-    R.col(1) = Eigen::Vector3f(1, 0, 0);  // Y-as naar 
+    R.col(1) = Eigen::Vector3f(-1, 0, 0);  // Y-as naar moveTo
     R.col(2) = Eigen::Vector3f(0, 0, 1);  // Z-as omlaag
 
     std::cout << "Target positie: ";

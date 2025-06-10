@@ -205,6 +205,21 @@ void IKSolver::solveOrientationOnly(const Eigen::Matrix3f &R_des, std::vector<fl
         }
     }
 
+#if IK_LOG_ORIENTATION || IK_LOG_SUMMARY
+    Eigen::Matrix4f tfFinal = arm->getEndEffectorTransform();
+    Eigen::Matrix3f R_final = tfFinal.block<3, 3>(0, 0);
+
+    std::cout << "\n[Orientation Result] Bereikte oriëntatie:\n";
+    std::cout << R_final << "\n";
+
+    Eigen::Matrix3f R_err = R_final.transpose() * R_des;
+    Eigen::AngleAxisf aa(R_err);
+
+    std::cout << "[Orientation Result] Rotatiefout:\n";
+    std::cout << "  Draaias  = (" << aa.axis().transpose() << ")\n";
+    std::cout << "  Hoek     = " << aa.angle() * (180.0 / M_PI) << " graden\n";
+#endif
+
     // Zet de eindresultaten terug in de vector
     for (int i = 3; i < 6; ++i)
         result[i] = arm->joints[i].getAngle();
